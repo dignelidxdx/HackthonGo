@@ -1,5 +1,9 @@
 package main
 
+import (
+	"github.com/gin-gonic/gin"
+)
+
 func main() {
 
 	router := gin.Default()
@@ -11,4 +15,5 @@ func main() {
 
 func getTotalFromInvoice(context *gin.Context) {
 
+	context.JSON(200, gin.H{"total": "100"})
 }
