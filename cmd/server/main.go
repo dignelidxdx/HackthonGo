@@ -1,6 +1,9 @@
 package main
 
 import (
+	"github.com/dignelidxdx/HackthonGo/cmd/server/handler"
+	backup "github.com/dignelidxdx/HackthonGo/internal/backup"
+	customer "github.com/dignelidxdx/HackthonGo/internal/customers"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -11,19 +14,30 @@ func main() {
 
 	router := gin.Default()
 
+	// CUSTOMER
+	repoC := customer.NewCustomerRepository()
+	serviceC := customer.NewCustomerService(repoC)
+	controllerC := handler.NewCustomer(serviceC)
+	// PRODUCTS
+	// SALES
+	// INVOICES
+
+	// BACKUP
+	repoBa := backup.NewBackUpRepository()
+	serviceBa := backup.NewBackUpService(repoBa, serviceC)
+	controllerBa := handler.NewBackUp(serviceBa)
+
 	// es necesario recalcular con los datos que dispone entre sales, invoices y products
-	router.GET("/customers/total/:condition", getTotalCustomersByCondition)
+	//router.GET("/customers/total", controller.SaveFile())
+	// producto top 5 mas vendidos
+
 	// para pasar datos a la base de datos
-	router.POST("/datas/backups", doBackUpAllData)
-	// para pasar datos a la base de datos
-	router.GET("/invoices", getAllInvoices)
-	router.GET("/products", getAllProducts)
-	router.GET("/customers", getAllCustomers)
-	router.GET("/sales", getAllSales)
+	router.POST("/datas/backups", controllerBa.SaveFiles())
+
 	// INSERT
 	router.POST("/invoices", createInvoice)
 	router.POST("/products", createProduct)
-	router.POST("/customers", createCustomer)
+	router.POST("/customers", controllerC.SaveCustomer())
 	router.POST("/sales", createSale)
 	// UPDATE
 	router.PUT("/invoices", updateInvoiceById)
@@ -36,14 +50,16 @@ func main() {
 
 // TOTAL
 
-func getTotalCustomersByCondition(context *gin.Context) {
+func getTotalCustomers(context *gin.Context) {
 
 	context.JSON(200, gin.H{"total": "100"})
+
 }
 
 func doBackUpAllData(context *gin.Context) {
 
 	context.JSON(200, gin.H{"total": "100"})
+
 }
 
 // GET ALL
