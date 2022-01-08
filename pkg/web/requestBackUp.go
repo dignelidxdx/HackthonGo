@@ -1,5 +1,5 @@
 package web
 
 type RequestBackUp struct {
-	IsUpdated bool `json:"is_updated"`
+	NameFile string `json:"name_file"`
 }
