@@ -30,7 +30,7 @@ func (backup *BackUpHandler) SaveFiles() gin.HandlerFunc {
 			if err != nil {
 				context.JSON(400, web.NewResponse(400, "", fmt.Sprintf("There was a error %v", err)))
 			} else {
-				context.JSON(200, web.NewResponse(200, "Se cargo customer con exito", ""))
+				context.JSON(200, web.NewResponse(200, "Se cargo item con exito", ""))
 			}
 		}
 

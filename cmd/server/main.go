@@ -4,6 +4,9 @@ import (
 	"github.com/dignelidxdx/HackthonGo/cmd/server/handler"
 	backup "github.com/dignelidxdx/HackthonGo/internal/backup"
 	customer "github.com/dignelidxdx/HackthonGo/internal/customers"
+	invoice "github.com/dignelidxdx/HackthonGo/internal/invoices"
+	product "github.com/dignelidxdx/HackthonGo/internal/products"
+	sale "github.com/dignelidxdx/HackthonGo/internal/sales"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -19,12 +22,21 @@ func main() {
 	serviceC := customer.NewCustomerService(repoC)
 	controllerC := handler.NewCustomer(serviceC)
 	// PRODUCTS
+	repoP := product.NewProductRepository()
+	serviceP := product.NewProductService(repoP)
+	//controllerP := handler.NewProduct(serviceP)
 	// SALES
+	repoS := sale.NewSaleRepository()
+	serviceS := sale.NewSaleService(repoS)
+	//controllerS := handler.NewSale(serviceS)
 	// INVOICES
+	repoI := invoice.NewInvoiceRepository()
+	serviceI := invoice.NewInvoiceService(repoI)
+	//controllerI := handler.NewInvoice(serviceI)
 
 	// BACKUP
 	repoBa := backup.NewBackUpRepository()
-	serviceBa := backup.NewBackUpService(repoBa, serviceC)
+	serviceBa := backup.NewBackUpService(repoBa, serviceC, serviceI, serviceP, serviceS)
 	controllerBa := handler.NewBackUp(serviceBa)
 
 	// es necesario recalcular con los datos que dispone entre sales, invoices y products

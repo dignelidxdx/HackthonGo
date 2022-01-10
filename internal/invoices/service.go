@@ -5,6 +5,7 @@ import "github.com/dignelidxdx/HackthonGo/internal/models"
 type InvoiceService interface {
 	SaveInvoice(models.Invoice) (models.Invoice, error)
 	SaveFile([]models.Invoice) error
+	GetOneByID(id int) (models.Invoice, error)
 }
 
 type invoiceService struct {
@@ -31,4 +32,8 @@ func (s *invoiceService) SaveFile(invoices []models.Invoice) error {
 		return err
 	}
 	return nil
+}
+
+func (s *invoiceService) GetOneByID(id int) (models.Invoice, error) {
+	return s.repository.GetOneByID(id)
 }

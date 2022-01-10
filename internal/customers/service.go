@@ -1,14 +1,13 @@
 package internal
 
 import (
-	"fmt"
-
 	"github.com/dignelidxdx/HackthonGo/internal/models"
 )
 
 type CustomerService interface {
 	SaveCustomer(models.Customer) (models.Customer, error)
 	SaveFile(customers []models.Customer) error
+	GetOneByID(id int) (models.Customer, error)
 }
 
 type customerService struct {
@@ -74,10 +73,13 @@ func (s *customerService) SaveCustomer(customer models.Customer) (models.Custome
 
 func (s *customerService) SaveFile(customers []models.Customer) error {
 
-	fmt.Println("service...")
 	err := s.repository.SaveFile(customers)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (s *customerService) GetOneByID(id int) (models.Customer, error) {
+	return s.repository.GetOneByID(id)
 }

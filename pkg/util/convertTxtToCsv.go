@@ -20,7 +20,15 @@ func ConvertToCsv(fileName string) error {
 	}
 
 	data := string(file)
-	newData := strings.ReplaceAll(data, "#$%#", ",")
+
+	var newData string
+	if fileName == "products" {
+		fmt.Println("paso por condicion")
+		newDataToConvert := strings.ReplaceAll(data, ",", ".")
+		newData = strings.ReplaceAll(newDataToConvert, "#$%#", ",")
+	} else {
+		newData = strings.ReplaceAll(data, "#$%#", ",")
+	}
 
 	os.WriteFile(outPutPath, []byte(newData), 0644)
 	return nil

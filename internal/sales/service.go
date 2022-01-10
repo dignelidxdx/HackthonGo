@@ -5,6 +5,7 @@ import "github.com/dignelidxdx/HackthonGo/internal/models"
 type SaleService interface {
 	SaveSale(models.Sale) (models.Sale, error)
 	SaveFile([]models.Sale) error
+	GetOneByID(id int) (models.Sale, error)
 }
 
 type saleService struct {
@@ -31,4 +32,8 @@ func (s *saleService) SaveFile(sales []models.Sale) error {
 		return err
 	}
 	return nil
+}
+
+func (s *saleService) GetOneByID(id int) (models.Sale, error) {
+	return s.repository.GetOneByID(id)
 }

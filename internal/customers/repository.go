@@ -22,6 +22,7 @@ type CustomerRepository interface {
 	Save(customer models.Customer) (models.Customer, error)
 	GetTotalSecludedByCondition() []models.Customer
 	GetCustomersOrderByLastName() []models.Customer
+	GetOneByID(id int) (models.Customer, error)
 	//Update(Customer models.Customer) (models.Customer, error)
 }
 
@@ -78,4 +79,26 @@ func (r *customerRepository) GetTotalSecludedByCondition() []models.Customer {
 
 func (r *customerRepository) GetCustomersOrderByLastName() []models.Customer {
 	return []models.Customer{}
+}
+
+func (r *customerRepository) GetOneByID(id int) (models.Customer, error) {
+
+	db := db.StorageDB
+	var customerRead models.Customer
+	rows, err := db.Query("SELECT id, last_name, first_name, `condition` FROM customers WHERE id = ?", id)
+
+	if err != nil {
+		log.Fatal(err)
+		return customerRead, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&customerRead.ID, &customerRead.LastName, &customerRead.FirstName, &customerRead.Condition)
+		if err != nil {
+			log.Fatal(err)
+			return customerRead, err
+		}
+	}
+
+	return customerRead, nil
 }

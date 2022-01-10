@@ -6,7 +6,6 @@ import (
 
 	"github.com/dignelidxdx/HackthonGo/internal/models"
 	"github.com/dignelidxdx/HackthonGo/pkg/db"
-	"github.com/dignelidxdx/HackthonGo/pkg/store"
 )
 
 type ProductRepository interface {
@@ -14,20 +13,20 @@ type ProductRepository interface {
 	GetAll() ([]models.Product, error)
 	Update(Product models.Product) (models.Product, error)
 	SaveFile(products []models.Product) error
+	GetOneByID(id int) (models.Product, error)
 }
 
 type productRepository struct {
-	db store.Store
 }
 
-func NewProductRepository(db store.Store) ProductRepository {
-	return &productRepository{db}
+func NewProductRepository() ProductRepository {
+	return &productRepository{}
 }
 
 func (r *productRepository) Save(product models.Product) (models.Product, error) {
 	db := db.StorageDB
 
-	stmt, err := db.Prepare("INSERT INTO products(description,price) VALUES(?,?)")
+	stmt, err := db.Prepare("INSERT INTO products(`description`, price) VALUES(?,?)")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,7 +46,7 @@ func (r *productRepository) GetAll() ([]models.Product, error) {
 	var products []models.Product
 	db := db.StorageDB
 	var productsRead models.Product
-	rows, err := db.Query("SELECT id, description, price FROM products")
+	rows, err := db.Query("SELECT id, `description`, price FROM products")
 
 	if err != nil {
 		log.Fatal(err)
@@ -74,17 +73,39 @@ func (r *productRepository) SaveFile(products []models.Product) error {
 
 	for _, product := range products {
 
-		stmt, err := db.Prepare("INSERT INTO products(last_name,first_name,`condition`) VALUES(?,?,?)")
+		stmt, err := db.Prepare("INSERT INTO products(id, `description`,price) VALUES(?,?,?)")
 		if err != nil {
 			log.Fatal(err)
 			return err
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(product.Description, product.Price)
+		_, err = stmt.Exec(product.ID, product.Description, product.Price)
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func (r *productRepository) GetOneByID(id int) (models.Product, error) {
+
+	db := db.StorageDB
+	var productRead models.Product
+	rows, err := db.Query("SELECT id, `description`, price FROM products WHERE id = ?", id)
+
+	if err != nil {
+		log.Fatal(err)
+		return productRead, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&productRead.ID, &productRead.Description, &productRead.Price)
+		if err != nil {
+			log.Fatal(err)
+			return productRead, err
+		}
+	}
+
+	return productRead, nil
 }
