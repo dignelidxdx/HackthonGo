@@ -7,6 +7,7 @@ import (
 
 	"github.com/dignelidxdx/HackthonGo/internal/models"
 	"github.com/dignelidxdx/HackthonGo/pkg/db"
+	"github.com/dignelidxdx/HackthonGo/pkg/web"
 )
 
 type ConditionEnum int
@@ -24,6 +25,7 @@ type CustomerRepository interface {
 	GetCustomersOrderByLastName() []models.Customer
 	GetOneByID(id int) (models.Customer, error)
 	//Update(Customer models.Customer) (models.Customer, error)
+	GetCustomerByMostCheapProduct() ([]web.ResponseCustomerCheapest, error)
 }
 
 type customerRepository struct {
@@ -39,14 +41,14 @@ func (r *customerRepository) SaveFile(customers []models.Customer) error {
 	fmt.Println("repository customer")
 	for _, c := range customers {
 
-		stmt, err := db.Prepare("INSERT INTO customers(last_name,first_name,`condition`) VALUES(?,?,?)")
+		stmt, err := db.Prepare("INSERT INTO customers(id, last_name,first_name,`condition`) VALUES(?,?,?,?)")
 		if err != nil {
 			log.Fatal(err)
 			return err
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(c.LastName, c.FirstName, c.Condition)
+		_, err = stmt.Exec(c.ID, c.LastName, c.FirstName, c.Condition)
 		if err != nil {
 			return err
 		}
@@ -101,4 +103,26 @@ func (r *customerRepository) GetOneByID(id int) (models.Customer, error) {
 	}
 
 	return customerRead, nil
+}
+
+func (r *customerRepository) GetCustomerByMostCheapProduct() ([]web.ResponseCustomerCheapest, error) {
+	var customers []web.ResponseCustomerCheapest
+	db := db.StorageDB
+	var customerRead web.ResponseCustomerCheapest
+	rows, err := db.Query("SELECT last_name, first_name FROM customers AS c INNER JOIN invoices AS i ON c.id = i.idcustomer INNER JOIN sales AS s ON s.idinvoice = i.id AND s.idproduct = (SELECT id FROM products ORDER BY price ASC LIMIT 1) ORDER BY last_name LIMIT 5")
+
+	if err != nil {
+		log.Fatal(err)
+		return []web.ResponseCustomerCheapest{}, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&customerRead.LastName, &customerRead.FirstName)
+		if err != nil {
+			log.Fatal(err)
+			return []web.ResponseCustomerCheapest{}, err
+		}
+		customers = append(customers, customerRead)
+	}
+	return customers, nil
 }

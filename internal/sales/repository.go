@@ -12,6 +12,8 @@ type SaleRepository interface {
 	Save(sale models.Sale) (models.Sale, error)
 	SaveFile(sales []models.Sale) error
 	GetOneByID(id int) (models.Sale, error)
+	GetQuantityAndIDProduct() (float64, int, error)
+	GetAll() ([]models.Sale, error)
 }
 
 type saleRepository struct {
@@ -45,14 +47,14 @@ func (r *saleRepository) SaveFile(sales []models.Sale) error {
 
 	for _, sale := range sales {
 
-		stmt, err := db.Prepare("INSERT INTO sales (idinvoice, idproduct, quantity) VALUES(?,?,?)")
+		stmt, err := db.Prepare("INSERT INTO sales (id, idinvoice, idproduct, quantity) VALUES(?,?,?,?)")
 		if err != nil {
 			log.Fatal(err)
 			return err
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(sale.Invoice.ID, sale.Product.ID, sale.Quantity)
+		_, err = stmt.Exec(sale.ID, sale.Invoice.ID, sale.Product.ID, sale.Quantity)
 		if err != nil {
 			return err
 		}
@@ -80,4 +82,51 @@ func (r *saleRepository) GetOneByID(id int) (models.Sale, error) {
 	}
 
 	return SaleRead, nil
+}
+
+func (r *saleRepository) GetQuantityAndIDProduct() (float64, int, error) {
+
+	var sales []models.Sale
+	var saleRead models.Sale
+
+	db := db.StorageDB
+
+	rows, err := db.Query("SELECT id, idinvoice, idproduct, quantity FROM sales")
+
+	if err != nil {
+		log.Fatal(err)
+		return 0.0, 0, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&saleRead.ID, &saleRead.Invoice.ID, &saleRead.Product.ID, &saleRead.Quantity)
+		if err != nil {
+			log.Fatal(err)
+			return 0.0, 0, err
+		}
+		sales = append(sales, saleRead)
+	}
+	return saleRead.Quantity, saleRead.Product.ID, nil
+}
+
+func (r *saleRepository) GetAll() ([]models.Sale, error) {
+	var sales []models.Sale
+	db := db.StorageDB
+	var saleRead models.Sale
+	rows, err := db.Query("SELECT id, idinvoice, idproduct, quantity FROM sales")
+
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&saleRead.ID, &saleRead.Invoice.ID, &saleRead.Product.ID, &saleRead.Quantity)
+		if err != nil {
+			log.Fatal(err)
+			return nil, err
+		}
+		sales = append(sales, saleRead)
+	}
+	return sales, nil
 }

@@ -37,3 +37,7 @@ func (s *productService) SaveFile(products []models.Product) error {
 func (s *productService) GetOneByID(id int) (models.Product, error) {
 	return s.repository.GetOneByID(id)
 }
+
+func (s *productService) MustProductSold() error {
+	return nil
+}

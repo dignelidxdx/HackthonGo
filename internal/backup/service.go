@@ -78,17 +78,14 @@ func (s *backUpService) SaveElementToDB(key string) error {
 	if isSaved {
 		return fmt.Errorf("ya se guardo el txt de %v", key)
 	}
-	fmt.Println("before to create csv")
 	err = util.ConvertToCsv(key)
 	if err != nil {
 		return err
 	}
-	fmt.Println("before to read csv")
 	lines, err := util.ReadCsv(key)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("after to read csv")
 
 	var indx int
 
@@ -98,7 +95,9 @@ func (s *backUpService) SaveElementToDB(key string) error {
 
 		// Loop through lines & turn into object
 		for _, line := range lines {
+			id, _ := strconv.Atoi(line[0])
 			data := models.Customer{
+				ID:        id,
 				LastName:  line[1],
 				FirstName: line[2],
 				Condition: line[3],
@@ -132,7 +131,9 @@ func (s *backUpService) SaveElementToDB(key string) error {
 			if err != nil {
 				return err
 			}
+			id, _ := strconv.Atoi(line[0])
 			data := models.Sale{
+				ID:       id,
 				Invoice:  invoice,
 				Product:  product,
 				Quantity: quantity,

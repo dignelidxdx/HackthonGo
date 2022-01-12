@@ -37,3 +37,31 @@ func (customer *CustomerHandler) SaveCustomer() gin.HandlerFunc {
 
 	}
 }
+
+func (customer *CustomerHandler) GetTotalesByCondition() gin.HandlerFunc {
+
+	return func(context *gin.Context) {
+
+		sliceCustomer, err := customer.service.GetTotalesByCondition()
+		if err != nil {
+			context.JSON(400, web.NewResponse(400, "", fmt.Sprintf("There was a error %v", err)))
+		} else {
+			context.JSON(200, sliceCustomer)
+		}
+
+	}
+}
+
+func (customer *CustomerHandler) GetCustomerByMostCheapProduct() gin.HandlerFunc {
+
+	return func(context *gin.Context) {
+
+		sliceCustomer, err := customer.service.GetCustomerByMostCheapProduct()
+		if err != nil {
+			context.JSON(400, web.NewResponse(400, "", fmt.Sprintf("There was a error %v", err)))
+		} else {
+			context.JSON(200, sliceCustomer)
+		}
+
+	}
+}

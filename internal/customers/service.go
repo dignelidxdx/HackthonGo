@@ -1,66 +1,29 @@
 package internal
 
 import (
+	"fmt"
+
+	invoice "github.com/dignelidxdx/HackthonGo/internal/invoices"
 	"github.com/dignelidxdx/HackthonGo/internal/models"
+	"github.com/dignelidxdx/HackthonGo/pkg/web"
 )
 
 type CustomerService interface {
 	SaveCustomer(models.Customer) (models.Customer, error)
 	SaveFile(customers []models.Customer) error
 	GetOneByID(id int) (models.Customer, error)
+	GetTotalesByCondition() ([]web.ResponseTotalesByCondition, error)
+	GetCustomerByMostCheapProduct() ([]web.ResponseCustomerCheapest, error)
 }
 
 type customerService struct {
-	repository CustomerRepository
+	repository     CustomerRepository
+	invoiceService invoice.InvoiceService
 }
 
-func NewCustomerService(repository CustomerRepository) CustomerService {
-	return &customerService{repository: repository}
+func NewCustomerService(repository CustomerRepository, invoiceService invoice.InvoiceService) CustomerService {
+	return &customerService{repository: repository, invoiceService: invoiceService}
 }
-
-/*
-func (s *customerService) SaveCustomerFile(nameFile string) error {
-
-	isSaved, err := s.backupService.IsSaved(nameFile)
-
-	if err != nil {
-		return err
-	}
-	if isSaved {
-		return fmt.Errorf("ya se guardo el txt")
-	}
-
-	err = util.ConvertToCsv(nameFile)
-	if err != nil {
-		return err
-	}
-	lines, err := util.ReadCsv(nameFile)
-	if err != nil {
-		panic(err)
-	}
-	clients := []models.Customer{}
-	// Loop through lines & turn into object
-	for _, line := range lines {
-		data := models.Customer{
-			LastName:  line[1],
-			FirstName: line[2],
-			Condition: line[3],
-		}
-		clients = append(clients, data)
-		fmt.Println(data.LastName + " " + data.FirstName)
-	}
-
-	err = s.repository.SaveFile(clients)
-	if err != nil {
-		return err
-	}
-	_, err = s.backupService.ToSave(1, nameFile)
-	if err != nil {
-		return err
-	}
-	return nil
-
-}*/
 
 func (s *customerService) SaveCustomer(customer models.Customer) (models.Customer, error) {
 
@@ -82,4 +45,42 @@ func (s *customerService) SaveFile(customers []models.Customer) error {
 
 func (s *customerService) GetOneByID(id int) (models.Customer, error) {
 	return s.repository.GetOneByID(id)
+}
+
+func (s *customerService) GetTotalesByCondition() ([]web.ResponseTotalesByCondition, error) {
+
+	var totalInactivo float64
+	var totalBloqueado float64
+	var totalActivo float64
+
+	invoices, err := s.invoiceService.GetAll()
+	if err != nil {
+		return []web.ResponseTotalesByCondition{}, err
+	}
+
+	for _, invoice := range invoices {
+		// Acá es donde podriamos usar un cache para los id que ya fueron buscados con anterioridad
+		customer, err := s.repository.GetOneByID(invoice.Customer.ID)
+		if err != nil {
+			return []web.ResponseTotalesByCondition{}, err
+		}
+		switch customer.Condition {
+		case "Inactivo":
+			totalInactivo += invoice.Total
+		case "Bloqueado":
+			totalBloqueado += invoice.Total
+		case "Activo":
+			totalActivo += invoice.Total
+		default:
+			return []web.ResponseTotalesByCondition{}, fmt.Errorf("la condicion es incorrecta")
+		}
+	}
+
+	return []web.ResponseTotalesByCondition{{Condition: "Activo", Total: totalActivo}, {Condition: "Bloqueado", Total: totalBloqueado}, {Condition: "Inactivo", Total: totalInactivo}}, nil
+}
+
+func (s *customerService) GetCustomerByMostCheapProduct() ([]web.ResponseCustomerCheapest, error) {
+
+	return s.repository.GetCustomerByMostCheapProduct()
+
 }

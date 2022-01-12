@@ -19,20 +19,17 @@ func main() {
 
 	// CUSTOMER
 	repoC := customer.NewCustomerRepository()
-	serviceC := customer.NewCustomerService(repoC)
-	controllerC := handler.NewCustomer(serviceC)
-	// PRODUCTS
 	repoP := product.NewProductRepository()
-	serviceP := product.NewProductService(repoP)
-	//controllerP := handler.NewProduct(serviceP)
-	// SALES
 	repoS := sale.NewSaleRepository()
-	serviceS := sale.NewSaleService(repoS)
-	//controllerS := handler.NewSale(serviceS)
-	// INVOICES
 	repoI := invoice.NewInvoiceRepository()
-	serviceI := invoice.NewInvoiceService(repoI)
-	//controllerI := handler.NewInvoice(serviceI)
+
+	serviceP := product.NewProductService(repoP)
+	serviceS := sale.NewSaleService(repoS)
+	serviceI := invoice.NewInvoiceService(repoI, serviceS, serviceP)
+	serviceC := customer.NewCustomerService(repoC, serviceI)
+
+	controllerC := handler.NewCustomer(serviceC)
+	controllerI := handler.NewInvoice(serviceI)
 
 	// BACKUP
 	repoBa := backup.NewBackUpRepository()
@@ -45,6 +42,12 @@ func main() {
 
 	// para pasar datos a la base de datos
 	router.POST("/datas/backups", controllerBa.SaveFiles())
+	// update total
+	router.PATCH("/invoices/total", controllerI.UpdateAllTotal())
+	// Get total by Condition
+	router.GET("/customers/totales", controllerC.GetTotalesByCondition())
+	// Get customer by cheapest product
+	router.GET("/customers/cheapest-product", controllerC.GetCustomerByMostCheapProduct())
 
 	// INSERT
 	router.POST("/invoices", createInvoice)

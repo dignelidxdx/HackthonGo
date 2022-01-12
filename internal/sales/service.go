@@ -6,6 +6,7 @@ type SaleService interface {
 	SaveSale(models.Sale) (models.Sale, error)
 	SaveFile([]models.Sale) error
 	GetOneByID(id int) (models.Sale, error)
+	GetAll() ([]models.Sale, error)
 }
 
 type saleService struct {
@@ -36,4 +37,8 @@ func (s *saleService) SaveFile(sales []models.Sale) error {
 
 func (s *saleService) GetOneByID(id int) (models.Sale, error) {
 	return s.repository.GetOneByID(id)
+}
+
+func (s *saleService) GetAll() ([]models.Sale, error) {
+	return s.repository.GetAll()
 }
