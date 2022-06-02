@@ -10,13 +10,14 @@ import (
 
 type service struct {
 	// Aca agregas la interfaz (en /port/out) como propiedad para llamar al repository
-	repository out.GetAllEmployees
-	client     out.GetEmployee
+	repository     out.GetAllEmployees
+	client         out.GetEmployee
+	circuitBreaker *circuitBreaker.CircuitBreaker
 }
 
 // Constructor
-func NewEmployeeService(repository out.GetAllEmployees, client out.GetEmployee) in.GetAllEmployeeUseCase {
-	return &service{repository: repository, client: client}
+func NewEmployeeService(repository out.GetAllEmployees, client out.GetEmployee, circuitBreaker *circuitBreaker.CircuitBreaker) in.GetAllEmployeeUseCase {
+	return &service{repository: repository, client: client, circuitBreaker: circuitBreaker}
 }
 
 // Es la implementacion de la inferfaz en application/port/in/GetAllEmployeeUseCase.go

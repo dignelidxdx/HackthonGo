@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/dignelidxdx/HackthonGo/pkg/lib/circuit_breaker"
+	circuitBreaker "github.com/dignelidxdx/HackthonGo/pkg/lib/circuitBreaker"
 	handlerE "github.com/dignelidxdx/HackthonGo/wrapper/adapter/in/handler"
 	"github.com/dignelidxdx/HackthonGo/wrapper/adapter/out/owner"
 	"github.com/dignelidxdx/HackthonGo/wrapper/adapter/out/persistence"
@@ -20,7 +20,7 @@ func main() {
 
 	repo, _ := persistence.NewEmployeeRepository()
 	newClient := owner.NewClient("")
-	circuitBreaker := circuit_breaker.NewCircuitBreaker()
+	circuitBreaker := circuitBreaker.NewCircuitBreaker()
 	service := service.NewEmployeeService(repo, newClient)
 	controller := handlerE.NewEmployee(service)
 
