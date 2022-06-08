@@ -9,14 +9,9 @@ import (
 	"github.com/dignelidxdx/HackthonGo/wrapper/domain"
 )
 
-const (
-	dbConnectionString = "%s:%s@tcp(%s)/%s?charset=utf8&parseTime=true"
-	driverName         = "mysql"
-)
-
 var (
 	QueryGetAll = `SELECT id, last_name, first_name, 'condition' FROM customers`
-	QueryCreate = `INSERT INTO employees(card_number_id,first_name,last_name,warehouse_id) VALUES (?,?,?,?)`
+	QueryCreate = `INSERT INTO customers(last_name, first_name, 'condition') VALUES (?,?,?)`
 )
 
 type employeeRepository struct {

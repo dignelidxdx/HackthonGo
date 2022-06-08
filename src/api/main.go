@@ -1,12 +1,12 @@
 package main
 
 import (
+	"github.com/dignelidxdx/HackthonGo/config"
+	"github.com/dignelidxdx/HackthonGo/pkg/db"
 	handlerE "github.com/dignelidxdx/HackthonGo/wrapper/adapter/in/handler"
 	"github.com/dignelidxdx/HackthonGo/wrapper/adapter/out/owner"
 	"github.com/dignelidxdx/HackthonGo/wrapper/adapter/out/persistence"
 	"github.com/dignelidxdx/HackthonGo/wrapper/application/service"
-
-	circuitBreaker "github.com/dignelidxdx/HackthonGo/pkg/lib/circuitBreaker"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -18,15 +18,18 @@ func main() {
 
 	router := gin.Default()
 
+	dataSource, port := config.BuildDataSource()
 	//Employee
-
+	db, _ := db.Gorm(dataSource)
 	repo, _ := persistence.NewEmployeeRepository()
-	newClient := owner.NewClient("")
-	circuitBreaker := circuitBreaker.NewCircuitBreaker()
-	service := service.NewEmployeeService(repo, newClient, circuitBreaker)
+	repoGorm, _ := persistence.NewGormRepository(db)
+	circuitBreaker := owner.NewCircuitBreaker()
+	newClient := owner.NewClient("", circuitBreaker)
+	service := service.NewEmployeeService(repo, repoGorm, newClient, circuitBreaker)
 	controller := handlerE.NewEmployee(service)
 
 	router.GET("/employees", controller.GetAll())
+	router.GET("/employees/:id", controller.GetOne())
 
-	router.Run(":8080")
+	router.Run(port)
 }
