@@ -22,7 +22,7 @@ func main() {
 	//Employee
 	db, _ := db.Gorm(dataSource)
 	repo, _ := persistence.NewEmployeeRepository()
-	repoGorm, _ := persistence.NewGormRepository(db)
+	repoGorm := persistence.NewGormRepository(db)
 	circuitBreaker := owner.NewCircuitBreaker()
 	newClient := owner.NewClient("", circuitBreaker)
 	service := service.NewEmployeeService(repo, repoGorm, newClient, circuitBreaker)
@@ -30,6 +30,8 @@ func main() {
 
 	router.GET("/employees", controller.GetAll())
 	router.GET("/employees/:id", controller.GetOne())
+	router.POST("/employees", controller.CreateOne())
+	router.DELETE("/employees/:id", controller.DeleteOne())
 
 	router.Run(port)
 }

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	port "github.com/dignelidxdx/HackthonGo/wrapper/application/port/in"
+	"github.com/dignelidxdx/HackthonGo/wrapper/domain"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +25,8 @@ func NewEmployee(employeeService port.GetAllEmployeeUseCase) EmployeeController 
 type EmployeeController interface {
 	GetAll() gin.HandlerFunc
 	GetOne() gin.HandlerFunc
+	CreateOne() gin.HandlerFunc
+	DeleteOne() gin.HandlerFunc
 }
 
 func (e *employee) GetAll() gin.HandlerFunc {
@@ -57,6 +60,47 @@ func (e *employee) GetOne() gin.HandlerFunc {
 			context.JSON(http.StatusBadRequest, err.Error())
 		} else {
 			context.JSON(http.StatusOK, employee)
+			return
+		}
+	}
+}
+
+func (e *employee) CreateOne() gin.HandlerFunc {
+	return func(context *gin.Context) {
+
+		var employeeToSave domain.Employee
+		err := context.ShouldBindJSON(&employeeToSave)
+		if err != nil {
+			context.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		employee, err := e.employeeService.CreateOne(context, employeeToSave)
+
+		if err != nil {
+			context.JSON(http.StatusBadRequest, err.Error())
+		} else {
+			context.JSON(http.StatusOK, employee)
+			return
+		}
+	}
+}
+func (e *employee) DeleteOne() gin.HandlerFunc {
+	return func(context *gin.Context) {
+
+		idParam, err := strconv.Atoi(context.Param("id"))
+
+		if err != nil {
+			context.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		id, err := e.employeeService.DeleteOne(context, idParam)
+
+		if err != nil {
+			context.JSON(http.StatusBadRequest, err.Error())
+		} else {
+			context.JSON(http.StatusOK, id)
 			return
 		}
 	}

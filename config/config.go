@@ -36,7 +36,7 @@ func BuildDataSource() (string, string) {
 	dbPassR := config.GetString("database.dbpassr")
 	schema := config.GetString("database.schema")
 
-	dataSource := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&", dbUserR, dbPassR, host, schema)
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True", dbUserR, dbPassR, host, schema)
 
 	return dataSource, port
 }
